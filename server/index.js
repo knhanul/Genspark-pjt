@@ -64,12 +64,13 @@ app.use((err, req, res, next) => {
 });
 
 // Start server
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`
   ╔═══════════════════════════════════════════╗
   ║  🎵 팝송 학습 API 서버 시작됨             ║
   ║  📡 포트: ${PORT}                          ║
-  ║  🌐 URL: http://localhost:${PORT}         ║
+  ║  🌐 Local: http://localhost:${PORT}       ║
+  ║  🌐 External: http://knhanul.duckdns.org:${PORT} ║
   ║  📚 API Docs: http://localhost:${PORT}/api║
   ╚═══════════════════════════════════════════╝
   `);
