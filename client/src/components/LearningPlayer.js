@@ -343,7 +343,6 @@ function LearningPlayer({ song, userId, onBack }) {
                 ➕ 가사 등록하기
               </button>
             </div>
-            </div>
           ) : (
             <div className="lyrics-list">
               {lyrics.map((lyric, index) => (
