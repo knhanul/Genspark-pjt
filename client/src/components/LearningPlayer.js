@@ -15,21 +15,7 @@ function LearningPlayer({ song, userId, onBack }) {
   const [loading, setLoading] = useState(true);
   const playerRef = useRef(null);
 
-  useEffect(() => {
-    fetchLyricsAndProgress();
-  }, [song.id]);
-
-  useEffect(() => {
-    if (playerRef.current && isPlaying) {
-      const interval = setInterval(() => {
-        const currentTime = playerRef.current.getCurrentTime();
-        updateCurrentLyric(currentTime);
-      }, 100);
-      return () => clearInterval(interval);
-    }
-  }, [isPlaying, lyrics]);
-
-  const fetchLyricsAndProgress = async () => {
+  const fetchLyricsAndProgress = React.useCallback(async () => {
     try {
       setLoading(true);
       const response = await axios.get(
@@ -43,16 +29,30 @@ function LearningPlayer({ song, userId, onBack }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId, song.id]);
 
-  const updateCurrentLyric = (currentTime) => {
+  const updateCurrentLyric = React.useCallback((currentTime) => {
     const index = lyrics.findIndex(
       (lyric) => currentTime >= lyric.start_time && currentTime <= lyric.end_time
     );
     if (index !== -1 && index !== currentLyricIndex) {
       setCurrentLyricIndex(index);
     }
-  };
+  }, [lyrics, currentLyricIndex]);
+
+  useEffect(() => {
+    fetchLyricsAndProgress();
+  }, [fetchLyricsAndProgress]);
+
+  useEffect(() => {
+    if (playerRef.current && isPlaying) {
+      const interval = setInterval(() => {
+        const currentTime = playerRef.current.getCurrentTime();
+        updateCurrentLyric(currentTime);
+      }, 100);
+      return () => clearInterval(interval);
+    }
+  }, [isPlaying, updateCurrentLyric]);
 
   const onPlayerReady = (event) => {
     playerRef.current = event.target;
