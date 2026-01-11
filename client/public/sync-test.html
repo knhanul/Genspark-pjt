@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>가사 동기화 테스트</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 */
+            height: 0;
+            overflow: hidden;
+            margin-bottom: 30px;
+            border-radius: 8px;
+        }
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 8px;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        .lyrics-container {
+            max-height: 400px;
+            overflow-y: auto;
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+        }
+        .lyric-item {
+            display: flex;
+            gap: 15px;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        .lyric-item:hover {
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+        .lyric-item.active {
+            border-color: #764ba2;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.25) 0%, rgba(118, 75, 162, 0.25) 100%);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+            transform: scale(1.02);
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5); }
+            50% { box-shadow: 0 8px 30px rgba(102, 126, 234, 0.7); }
+        }
+        .lyric-number {
+            min-width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+        .lyric-content {
+            flex: 1;
+        }
+        .lyric-text {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        .lyric-translation {
+            font-size: 14px;
+            color: #666;
+            font-style: italic;
+            margin-bottom: 5px;
+        }
+        .lyric-time {
+            font-size: 12px;
+            color: #999;
+        }
+        .console {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .console-line {
+            margin-bottom: 5px;
+            line-height: 1.5;
+        }
+        .info { color: #4fc3f7; }
+        .success { color: #81c784; }
+        .error { color: #e57373; }
+        .warn { color: #ffb74d; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎵 팝송 가사 실시간 동기화 테스트</h1>
+        <p class="subtitle">Imagine - John Lennon</p>
+        
+        <div class="video-container">
+            <iframe 
+                id="youtube-player"
+                src="https://www.youtube.com/embed/YkgkThdzX-8?enablejsapi=1" 
+                frameborder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowfullscreen>
+            </iframe>
+        </div>
+        
+        <div class="controls">
+            <button class="btn-primary" onclick="playVideo()">▶️ 재생</button>
+            <button class="btn-primary" onclick="pauseVideo()">⏸️ 일시정지</button>
+            <button class="btn-primary" onclick="stopVideo()">⏹️ 정지</button>
+            <button class="btn-primary" onclick="clearConsole()">🗑️ 로그 지우기</button>
+        </div>
+        
+        <div class="lyrics-container" id="lyrics-container">
+            <!-- 가사가 여기에 동적으로 추가됩니다 -->
+        </div>
+        
+        <div class="console" id="console">
+            <div class="console-line success">✅ 시스템 준비 완료</div>
+            <div class="console-line info">ℹ️ 재생 버튼을 눌러 실시간 가사 동기화를 확인하세요!</div>
+        </div>
+    </div>
+
+    <script>
+        // 가사 데이터
+        const lyrics = [
+            { id: 1, number: 1, text: "Imagine there's no heaven", translation: "천국이 없다고 상상해봐요", start: 14.5, end: 18.0 },
+            { id: 2, number: 2, text: "It's easy if you try", translation: "노력하면 쉬워요", start: 18.0, end: 21.5 },
+            { id: 3, number: 3, text: "No hell below us", translation: "우리 아래 지옥도 없고", start: 21.5, end: 24.5 },
+            { id: 4, number: 4, text: "Above us only sky", translation: "우리 위엔 오직 하늘만", start: 24.5, end: 28.0 },
+            { id: 5, number: 5, text: "Imagine all the people", translation: "모든 사람들이", start: 28.0, end: 32.0 },
+            { id: 6, number: 6, text: "Living for today", translation: "오늘을 위해 산다고 상상해봐요", start: 32.0, end: 36.0 }
+        ];
+
+        let currentLyricIndex = -1;
+        let player = null;
+        let syncInterval = null;
+
+        // 가사 렌더링
+        function renderLyrics() {
+            const container = document.getElementById('lyrics-container');
+            container.innerHTML = lyrics.map((lyric, index) => `
+                <div class="lyric-item" id="lyric-${index}" onclick="seekToLyric(${index})">
+                    <div class="lyric-number">${lyric.number}</div>
+                    <div class="lyric-content">
+                        <div class="lyric-text">${lyric.text}</div>
+                        <div class="lyric-translation">${lyric.translation}</div>
+                        <div class="lyric-time">${lyric.start}s - ${lyric.end}s</div>
+                    </div>
+                </div>
+            `).join('');
+            log('📊 총 ' + lyrics.length + '개의 가사 구절 로드됨', 'success');
+        }
+
+        // 콘솔 로그
+        function log(message, type = 'info') {
+            const console = document.getElementById('console');
+            const line = document.createElement('div');
+            line.className = 'console-line ' + type;
+            line.textContent = new Date().toLocaleTimeString() + ' - ' + message;
+            console.appendChild(line);
+            console.scrollTop = console.scrollHeight;
+        }
+
+        function clearConsole() {
+            document.getElementById('console').innerHTML = '';
+            log('🗑️ 로그 초기화', 'info');
+        }
+
+        // YouTube IFrame API
+        var tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('youtube-player', {
+                events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange
+                }
+            });
+        }
+
+        function onPlayerReady(event) {
+            log('✅ YouTube Player 준비 완료', 'success');
+            renderLyrics();
+        }
+
+        function onPlayerStateChange(event) {
+            const states = {
+                '-1': '준비 중',
+                '0': '종료',
+                '1': '재생 중',
+                '2': '일시정지',
+                '3': '버퍼링',
+                '5': '대기'
+            };
+            log('🎬 YouTube 상태: ' + states[event.data], 'info');
+            
+            if (event.data === YT.PlayerState.PLAYING) {
+                startSync();
+            } else {
+                stopSync();
+            }
+        }
+
+        // 동기화 시작
+        function startSync() {
+            if (syncInterval) return;
+            
+            log('▶️ 실시간 가사 동기화 활성화', 'success');
+            syncInterval = setInterval(() => {
+                if (!player || !player.getCurrentTime) return;
+                
+                const currentTime = player.getCurrentTime();
+                const index = lyrics.findIndex(
+                    lyric => currentTime >= lyric.start && currentTime <= lyric.end
+                );
+                
+                if (index !== -1 && index !== currentLyricIndex) {
+                    updateCurrentLyric(index, currentTime);
+                }
+            }, 100);
+        }
+
+        // 동기화 중지
+        function stopSync() {
+            if (syncInterval) {
+                clearInterval(syncInterval);
+                syncInterval = null;
+                log('⏸️ 가사 동기화 비활성화', 'warn');
+            }
+        }
+
+        // 현재 가사 업데이트
+        function updateCurrentLyric(index, currentTime) {
+            // 이전 활성 가사 비활성화
+            if (currentLyricIndex >= 0) {
+                const prevElement = document.getElementById('lyric-' + currentLyricIndex);
+                if (prevElement) prevElement.classList.remove('active');
+            }
+            
+            // 새 가사 활성화
+            currentLyricIndex = index;
+            const element = document.getElementById('lyric-' + index);
+            if (element) {
+                element.classList.add('active');
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            
+            const lyric = lyrics[index];
+            log('🎵 ' + currentTime.toFixed(2) + '초 -> 가사 ' + (index + 1) + '번: "' + lyric.text + '"', 'success');
+        }
+
+        // 비디오 제어
+        function playVideo() {
+            if (player) {
+                player.playVideo();
+                log('▶️ 재생 시작', 'info');
+            }
+        }
+
+        function pauseVideo() {
+            if (player) {
+                player.pauseVideo();
+                log('⏸️ 일시정지', 'warn');
+            }
+        }
+
+        function stopVideo() {
+            if (player) {
+                player.stopVideo();
+                stopSync();
+                currentLyricIndex = -1;
+                document.querySelectorAll('.lyric-item').forEach(el => el.classList.remove('active'));
+                log('⏹️ 정지', 'error');
+            }
+        }
+
+        // 가사 클릭 시 해당 위치로 이동
+        function seekToLyric(index) {
+            if (player) {
+                const lyric = lyrics[index];
+                player.seekTo(lyric.start);
+                player.playVideo();
+                log('👆 가사 클릭: ' + (index + 1) + '번 "' + lyric.text + '" (' + lyric.start + '초)', 'info');
+            }
+        }
+    </script>
+</body>
+</html>

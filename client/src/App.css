@@ -102,6 +102,32 @@
   background: #c82333;
 }
 
+.btn-warning {
+  background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+  color: white;
+}
+
+.btn-warning:hover {
+  background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(255, 152, 0, 0.4);
+}
+
+.btn-info {
+  background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+  color: white;
+}
+
+.btn-info:hover {
+  background: linear-gradient(135deg, #138496 0%, #117a8b 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(23, 162, 184, 0.4);
+}
+
+.btn-danger:hover {
+  background: #c82333;
+}
+
 .btn-small {
   padding: 0.5rem 1rem;
   font-size: 0.9rem;
