@@ -85,23 +85,7 @@ function LyricsGridEditor({ song, onClose, playerRef, onSave }) {
   };
 
   // 데이터 로드
-  useEffect(() => {
-    loadLyrics();
-  }, [song]);
-
-  // 실시간 현재 시간 업데이트
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (playerRef && playerRef.current && typeof playerRef.current.getCurrentTime === 'function') {
-        const time = playerRef.current.getCurrentTime();
-        setCurrentTime(time);
-      }
-    }, 100);
-
-    return () => clearInterval(interval);
-  }, [playerRef]);
-
-  const loadLyrics = async () => {
+  const loadLyrics = useCallback(async () => {
     try {
       const response = await axios.get(`${API_URL}/lyrics/song/${song.id}`);
       const lyrics = response.data.map((lyric, index) => ({
@@ -118,7 +102,23 @@ function LyricsGridEditor({ song, onClose, playerRef, onSave }) {
       console.error('가사 로드 실패:', error);
       setRowData([]);
     }
-  };
+  }, [song.id]);
+
+  useEffect(() => {
+    loadLyrics();
+  }, [loadLyrics]);
+
+  // 실시간 현재 시간 업데이트
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (playerRef && playerRef.current && typeof playerRef.current.getCurrentTime === 'function') {
+        const time = playerRef.current.getCurrentTime();
+        setCurrentTime(time);
+      }
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, [playerRef]);
 
   // 유효성 검증 함수들
   const validateStartTime = (rowData, rowIndex) => {
