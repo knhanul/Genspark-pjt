@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import YouTube from 'react-youtube';
 import axios from 'axios';
-import TimestampEditor from './TimestampEditor';
-import BatchTimestampEditor from './BatchTimestampEditor';
-import LyricsForm from './LyricsForm';
+import LyricsGridEditor from './LyricsGridEditor';
 import './LearningPlayer.css';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
@@ -16,10 +14,7 @@ function LearningPlayer({ song, userId, onBack }) {
   const [hideMode, setHideMode] = useState(false);
   const [repeatMode, setRepeatMode] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [editMode, setEditMode] = useState(false);
-  const [editingLyric, setEditingLyric] = useState(null);
-  const [batchEditMode, setBatchEditMode] = useState(false);
-  const [showLyricsForm, setShowLyricsForm] = useState(false);
+  const [showGridEditor, setShowGridEditor] = useState(false);
   const playerRef = useRef(null);
 
   const fetchLyricsAndProgress = React.useCallback(async () => {
@@ -171,86 +166,7 @@ function LearningPlayer({ song, userId, onBack }) {
     }
   };
 
-  const handleEditTimestamp = (lyric) => {
-    console.log('⚙️ 타임스탬프 편집 모드:', lyric);
-    setEditingLyric(lyric);
-    // 일시정지하지 않음 - 사용자가 자유롭게 영상 조작 가능
-  };
 
-  const handleSaveTimestamp = async (updatedLyric) => {
-    try {
-      console.log('💾 타임스탬프 저장:', updatedLyric);
-      await axios.put(`${API_URL}/lyrics/${updatedLyric.id}`, {
-        start_time: updatedLyric.start_time,
-        end_time: updatedLyric.end_time
-      });
-      
-      setLyrics(lyrics.map(l => 
-        l.id === updatedLyric.id 
-          ? { ...l, start_time: updatedLyric.start_time, end_time: updatedLyric.end_time }
-          : l
-      ));
-      
-      setEditingLyric(null);
-      alert('✅ 타임스탬프가 저장되었습니다!');
-      console.log('✅ 타임스탬프 저장 완료');
-    } catch (error) {
-      console.error('❌ 타임스탬프 저장 실패:', error);
-      alert('타임스탬프 저장에 실패했습니다.');
-    }
-  };
-
-  const handleCancelEdit = () => {
-    setEditingLyric(null);
-  };
-
-  const handleBatchEdit = () => {
-    console.log('📋 일괄 편집 모드 활성화');
-    setBatchEditMode(true);
-  };
-
-  const handleSaveBatchTimestamps = async (editedLyrics) => {
-    try {
-      console.log(`💾 일괄 저장: ${editedLyrics.length}개 가사`);
-      
-      // 각 가사를 순차적으로 업데이트
-      for (const lyric of editedLyrics) {
-        await axios.put(`${API_URL}/lyrics/${lyric.id}`, {
-          start_time: lyric.start_time,
-          end_time: lyric.end_time
-        });
-      }
-      
-      // 로컬 상태 업데이트
-      setLyrics(editedLyrics);
-      
-      setBatchEditMode(false);
-      alert(`✅ ${editedLyrics.length}개 가사의 타임스탬프가 저장되었습니다!`);
-      console.log('✅ 일괄 저장 완료');
-    } catch (error) {
-      console.error('❌ 일괄 저장 실패:', error);
-      alert('일괄 저장에 실패했습니다.');
-    }
-  };
-
-  const handleCancelBatchEdit = () => {
-    setBatchEditMode(false);
-  };
-
-  const handleAddLyrics = () => {
-    console.log('📝 가사 등록 모드 활성화');
-    setShowLyricsForm(true);
-  };
-
-  const handleLyricsFormComplete = () => {
-    setShowLyricsForm(false);
-    // 가사 목록 새로고침
-    fetchLyricsAndProgress();
-  };
-
-  const handleLyricsFormCancel = () => {
-    setShowLyricsForm(false);
-  };
 
   const opts = {
     height: '480',
@@ -299,16 +215,10 @@ function LearningPlayer({ song, userId, onBack }) {
           {repeatMode ? '🔁 반복 중' : '🔁 반복 모드'}
         </button>
         <button
-          className={`btn ${editMode ? 'btn-warning' : 'btn-secondary'} btn-small`}
-          onClick={() => setEditMode(!editMode)}
+          className="btn btn-primary btn-small"
+          onClick={() => setShowGridEditor(true)}
         >
-          {editMode ? '⚙️ 편집 중' : '⚙️ 개별 편집'}
-        </button>
-        <button
-          className="btn btn-info btn-small"
-          onClick={handleBatchEdit}
-        >
-          📋 일괄 편집
+          📝 가사 편집
         </button>
       </div>
 
@@ -325,12 +235,6 @@ function LearningPlayer({ song, userId, onBack }) {
         <div className="lyrics-section">
           <div className="lyrics-header">
             <h3>📝 가사</h3>
-            <button
-              className="btn btn-success btn-small"
-              onClick={handleAddLyrics}
-            >
-              ➕ 가사 등록
-            </button>
           </div>
           {lyrics.length === 0 ? (
             <div className="empty-lyrics">
@@ -338,7 +242,7 @@ function LearningPlayer({ song, userId, onBack }) {
               <p>아직 가사가 등록되지 않았습니다.</p>
               <button
                 className="btn btn-primary"
-                onClick={handleAddLyrics}
+                onClick={() => setShowGridEditor(true)}
               >
                 ➕ 가사 등록하기
               </button>
@@ -373,41 +277,26 @@ function LearningPlayer({ song, userId, onBack }) {
                     </div>
                   </div>
                   <div className="lyric-actions">
-                    {editMode ? (
-                      <button
-                        className="btn-icon btn-edit"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleEditTimestamp(lyric);
-                        }}
-                        title="타임스탬프 편집"
-                      >
-                        ⚙️
-                      </button>
-                    ) : (
-                      <>
-                        <button
-                          className="btn-icon"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleRepeatLyric(lyric, index);
-                          }}
-                          title="이 구절 반복"
-                        >
-                          🔁
-                        </button>
-                        <button
-                          className={`btn-icon ${lyric.is_mastered ? 'mastered' : ''}`}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleToggleMastered(lyric);
-                          }}
-                          title={lyric.is_mastered ? '마스터 취소' : '마스터 완료'}
-                        >
-                          {lyric.is_mastered ? '✅' : '⭐'}
-                        </button>
-                      </>
-                    )}
+                    <button
+                      className="btn-icon"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRepeatLyric(lyric, index);
+                      }}
+                      title="이 구절 반복"
+                    >
+                      🔁
+                    </button>
+                    <button
+                      className={`btn-icon ${lyric.is_mastered ? 'mastered' : ''}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleToggleMastered(lyric);
+                      }}
+                      title={lyric.is_mastered ? '마스터 취소' : '마스터 완료'}
+                    >
+                      {lyric.is_mastered ? '✅' : '⭐'}
+                    </button>
                   </div>
                 </div>
               ))}
@@ -440,30 +329,15 @@ function LearningPlayer({ song, userId, onBack }) {
         </div>
       )}
 
-      {editingLyric && (
-        <TimestampEditor
-          lyric={editingLyric}
-          playerRef={playerRef}
-          onSave={handleSaveTimestamp}
-          onCancel={handleCancelEdit}
-        />
-      )}
-
-      {batchEditMode && (
-        <BatchTimestampEditor
-          lyrics={lyrics}
-          playerRef={playerRef}
-          songId={song.id}
-          onSave={handleSaveBatchTimestamps}
-          onCancel={handleCancelBatchEdit}
-        />
-      )}
-
-      {showLyricsForm && (
-        <LyricsForm
+      {showGridEditor && (
+        <LyricsGridEditor
           song={song}
-          onComplete={handleLyricsFormComplete}
-          onCancel={handleLyricsFormCancel}
+          onClose={() => setShowGridEditor(false)}
+          playerRef={playerRef}
+          onSave={() => {
+            fetchLyricsAndProgress();
+            setShowGridEditor(false);
+          }}
         />
       )}
     </div>

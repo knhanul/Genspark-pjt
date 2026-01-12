@@ -1,0 +1,442 @@
+/* 가사 그리드 편집기 - AG Grid 기반 */
+
+.lyrics-grid-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  padding: 20px;
+}
+
+.lyrics-grid-modal {
+  background: white;
+  border-radius: 16px;
+  width: 98%;
+  max-width: 1600px;
+  height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: modalFadeIn 0.3s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* 헤더 */
+.grid-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 32px;
+  border-bottom: 2px solid #e0e0e0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 16px 16px 0 0;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.grid-header h3 {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.current-time-badge {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  backdrop-filter: blur(10px);
+}
+
+.close-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.close-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: rotate(90deg);
+}
+
+/* 재생 속도 컨트롤 */
+.playback-controls {
+  padding: 16px 32px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.playback-controls label {
+  font-weight: 600;
+  color: #495057;
+}
+
+.speed-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.speed-btn {
+  padding: 6px 14px;
+  border: 2px solid #dee2e6;
+  background: white;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.speed-btn:hover {
+  border-color: #667eea;
+  background: #f0f2ff;
+}
+
+.speed-btn.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-color: #667eea;
+}
+
+/* AG Grid 컨테이너 */
+.grid-container {
+  flex: 1;
+  margin: 0 32px;
+  margin-top: 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* AG Grid 커스텀 스타일 */
+.ag-theme-alpine {
+  --ag-header-height: 60px;
+  --ag-row-height: 50px;
+  --ag-header-background-color: #f8f9fa;
+  --ag-header-foreground-color: #495057;
+  --ag-odd-row-background-color: #ffffff;
+  --ag-row-hover-color: #f1f3f5;
+  --ag-selected-row-background-color: #e7f3ff;
+  --ag-border-color: #dee2e6;
+  --ag-font-size: 14px;
+  --ag-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
+}
+
+.ag-theme-alpine .ag-header-cell {
+  font-weight: 700;
+}
+
+.ag-theme-alpine .ag-cell {
+  padding: 8px;
+  line-height: 1.5;
+}
+
+/* 하단 컨트롤 바 */
+.grid-controls {
+  padding: 16px 32px;
+  background: #f8f9fa;
+  border-top: 2px solid #e0e0e0;
+  display: flex;
+  gap: 32px;
+  overflow-x: auto;
+}
+
+.control-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: fit-content;
+}
+
+.control-section h4 {
+  margin: 0 0 8px 0;
+  font-size: 0.9rem;
+  color: #6c757d;
+  font-weight: 600;
+}
+
+.control-section > button,
+.control-section > label {
+  display: flex;
+  gap: 8px;
+}
+
+.ctrl-btn {
+  padding: 10px 16px;
+  border: 2px solid #dee2e6;
+  background: white;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.ctrl-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.ctrl-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-start {
+  border-color: #28a745;
+  color: #28a745;
+}
+
+.btn-start:hover:not(:disabled) {
+  background: #28a745;
+  color: white;
+}
+
+.btn-end {
+  border-color: #dc3545;
+  color: #dc3545;
+}
+
+.btn-end:hover:not(:disabled) {
+  background: #dc3545;
+  color: white;
+}
+
+.btn-seek {
+  border-color: #667eea;
+  color: #667eea;
+}
+
+.btn-seek:hover:not(:disabled) {
+  background: #667eea;
+  color: white;
+}
+
+.btn-add {
+  border-color: #007bff;
+  color: #007bff;
+}
+
+.btn-add:hover {
+  background: #007bff;
+  color: white;
+}
+
+.btn-delete {
+  border-color: #dc3545;
+  color: #dc3545;
+}
+
+.btn-delete:hover:not(:disabled) {
+  background: #dc3545;
+  color: white;
+}
+
+.btn-download {
+  border-color: #17a2b8;
+  color: #17a2b8;
+}
+
+.btn-download:hover {
+  background: #17a2b8;
+  color: white;
+}
+
+.btn-upload {
+  border-color: #ffc107;
+  color: #856404;
+  cursor: pointer;
+}
+
+.btn-upload:hover {
+  background: #ffc107;
+  color: white;
+}
+
+/* 푸터 */
+.grid-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 32px;
+  border-top: 2px solid #e0e0e0;
+  background: white;
+  border-radius: 0 0 16px 16px;
+}
+
+.footer-info {
+  font-size: 0.95rem;
+  color: #6c757d;
+}
+
+.footer-info strong {
+  color: #495057;
+  font-weight: 700;
+}
+
+.footer-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.btn {
+  padding: 12px 24px;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-secondary {
+  background: #6c757d;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background: #5a6268;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1400px) {
+  .grid-controls {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 768px) {
+  .lyrics-grid-modal {
+    width: 100%;
+    height: 100vh;
+    border-radius: 0;
+  }
+
+  .grid-header {
+    padding: 16px 20px;
+  }
+
+  .grid-header h3 {
+    font-size: 1.1rem;
+  }
+
+  .header-left {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .playback-controls {
+    padding: 12px 20px;
+    flex-wrap: wrap;
+  }
+
+  .speed-buttons {
+    flex-wrap: wrap;
+  }
+
+  .grid-container {
+    margin: 0 20px;
+    margin-top: 12px;
+  }
+
+  .grid-controls {
+    padding: 12px 20px;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .control-section {
+    width: 100%;
+  }
+
+  .control-section > button,
+  .control-section > label {
+    flex-direction: column;
+  }
+
+  .grid-footer {
+    padding: 16px 20px;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .footer-buttons {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .footer-buttons .btn {
+    flex: 1;
+  }
+}
+
+/* 스크롤바 스타일 */
+.grid-controls::-webkit-scrollbar {
+  height: 6px;
+}
+
+.grid-controls::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.grid-controls::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 3px;
+}
+
+.grid-controls::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
