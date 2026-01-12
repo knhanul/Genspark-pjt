@@ -53,7 +53,7 @@ function LyricsForm({ song, onComplete, onCancel }) {
         }
       });
 
-      const response = await axios.post(`${API_URL}/lyrics/batch`, {
+      await axios.post(`${API_URL}/lyrics/batch`, {
         song_id: song.id,
         lyrics: lyricsData
       });
