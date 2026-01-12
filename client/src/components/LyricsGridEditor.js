@@ -52,7 +52,11 @@ function LyricsGridEditor({ song, onClose, playerRef, onSave }) {
         return isNaN(value) ? 0 : value;
       },
       cellStyle: (params) => {
-        const isValid = validateStartTime(params.data, params.node.rowIndex);
+        // 렌더링 시점에 params.data 사용
+        const startTime = parseFloat(params.data?.start_time || 0);
+        const endTime = parseFloat(params.data?.end_time || 0);
+        const isValid = !(endTime > 0 && startTime >= endTime);
+        
         return {
           backgroundColor: isValid ? 'white' : '#ffe0e0',
           textAlign: 'center',
@@ -70,7 +74,11 @@ function LyricsGridEditor({ song, onClose, playerRef, onSave }) {
         return isNaN(value) ? 0 : value;
       },
       cellStyle: (params) => {
-        const isValid = validateEndTime(params.data, params.node.rowIndex);
+        // 렌더링 시점에 params.data 사용
+        const startTime = parseFloat(params.data?.start_time || 0);
+        const endTime = parseFloat(params.data?.end_time || 0);
+        const isValid = !(startTime > 0 && endTime <= startTime);
+        
         return {
           backgroundColor: isValid ? 'white' : '#ffe0e0',
           textAlign: 'center',
@@ -135,43 +143,37 @@ function LyricsGridEditor({ song, onClose, playerRef, onSave }) {
     return () => clearInterval(interval);
   }, [playerRef]);
 
-  // 유효성 검증 함수들
-  const validateStartTime = (rowData, rowIndex) => {
-    const allRows = gridRef.current?.api?.getModel()?.rowsToDisplay?.map(row => row.data) || [];
-    const currentRow = allRows[rowIndex];
-    if (!currentRow) return true;
+  // 유효성 검증 함수들 (rowData 상태 기반)
+  const validateStartTime = (currentRowData, rowIndex) => {
+    if (!currentRowData) return true;
 
-    const startTime = parseFloat(currentRow.start_time || 0);
-    const endTime = parseFloat(currentRow.end_time || 0);
+    const startTime = parseFloat(currentRowData.start_time || 0);
+    const endTime = parseFloat(currentRowData.end_time || 0);
 
     // 종료 시간보다 시작 시간이 크면 안됨
     if (endTime > 0 && startTime >= endTime) return false;
 
     // 이전 행의 종료 시간보다 작으면 안됨
-    if (rowIndex > 0) {
-      const prevRow = allRows[rowIndex - 1];
-      const prevEndTime = parseFloat(prevRow.end_time || 0);
+    if (rowIndex > 0 && rowData[rowIndex - 1]) {
+      const prevEndTime = parseFloat(rowData[rowIndex - 1].end_time || 0);
       if (prevEndTime > 0 && startTime < prevEndTime) return false;
     }
 
     return true;
   };
 
-  const validateEndTime = (rowData, rowIndex) => {
-    const allRows = gridRef.current?.api?.getModel()?.rowsToDisplay?.map(row => row.data) || [];
-    const currentRow = allRows[rowIndex];
-    if (!currentRow) return true;
+  const validateEndTime = (currentRowData, rowIndex) => {
+    if (!currentRowData) return true;
 
-    const startTime = parseFloat(currentRow.start_time || 0);
-    const endTime = parseFloat(currentRow.end_time || 0);
+    const startTime = parseFloat(currentRowData.start_time || 0);
+    const endTime = parseFloat(currentRowData.end_time || 0);
 
     // 시작 시간보다 종료 시간이 작으면 안됨
     if (startTime > 0 && endTime <= startTime) return false;
 
     // 다음 행의 시작 시간보다 크면 안됨
-    if (rowIndex < allRows.length - 1) {
-      const nextRow = allRows[rowIndex + 1];
-      const nextStartTime = parseFloat(nextRow.start_time || 0);
+    if (rowIndex < rowData.length - 1 && rowData[rowIndex + 1]) {
+      const nextStartTime = parseFloat(rowData[rowIndex + 1].start_time || 0);
       if (nextStartTime > 0 && endTime > nextStartTime) return false;
     }
 
