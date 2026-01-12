@@ -12,6 +12,7 @@ function LyricsGridEditor({ song, onClose, playerRef, onSave }) {
   const [selectedRow, setSelectedRow] = useState(null);
   const [currentTime, setCurrentTime] = useState(0);
   const [playbackRate, setPlaybackRate] = useState(1.0);
+  const [loading, setLoading] = useState(true);
   const gridRef = useRef();
 
   // 컬럼 정의
@@ -87,8 +88,12 @@ function LyricsGridEditor({ song, onClose, playerRef, onSave }) {
   // 데이터 로드
   const loadLyrics = useCallback(async () => {
     try {
+      setLoading(true);
+      console.log('📥 가사 로드 시작:', `${API_URL}/lyrics/song/${song.id}`);
       const response = await axios.get(`${API_URL}/lyrics/song/${song.id}`);
-      console.log('📥 가사 로드:', response.data);
+      console.log('📥 가사 로드 응답:', response.data);
+      console.log('📥 가사 개수:', response.data.length);
+      
       const lyrics = response.data.map((lyric, index) => ({
         lyric_id: lyric.id || lyric.lyric_id || null, // id 필드 우선 사용
         line_number: lyric.line_number || index + 1,
@@ -99,10 +104,14 @@ function LyricsGridEditor({ song, onClose, playerRef, onSave }) {
         song_id: song.id
       }));
       console.log('✅ 변환된 가사:', lyrics);
+      console.log('✅ rowData 설정:', lyrics.length, '개');
       setRowData(lyrics);
     } catch (error) {
       console.error('❌ 가사 로드 실패:', error);
+      alert('가사를 불러오는데 실패했습니다: ' + error.message);
       setRowData([]);
+    } finally {
+      setLoading(false);
     }
   }, [song.id]);
 
@@ -454,17 +463,30 @@ function LyricsGridEditor({ song, onClose, playerRef, onSave }) {
 
         {/* AG Grid */}
         <div className="ag-theme-alpine grid-container">
-          <AgGridReact
-            ref={gridRef}
-            rowData={rowData}
-            columnDefs={columnDefs}
-            defaultColDef={defaultColDef}
-            rowSelection="single"
-            onSelectionChanged={onSelectionChanged}
-            onCellValueChanged={onCellValueChanged}
-            domLayout="normal"
-            suppressCellFocus={false}
-          />
+          {loading ? (
+            <div className="grid-loading">
+              <div className="loading-spinner">⏳</div>
+              <p>가사를 불러오는 중...</p>
+            </div>
+          ) : rowData.length === 0 ? (
+            <div className="grid-empty">
+              <div className="empty-icon">📝</div>
+              <p>등록된 가사가 없습니다.</p>
+              <p className="empty-hint">하단의 "➕ 행 추가" 버튼으로 가사를 추가하거나<br/>"📤 TSV 임포트"로 가사를 불러오세요.</p>
+            </div>
+          ) : (
+            <AgGridReact
+              ref={gridRef}
+              rowData={rowData}
+              columnDefs={columnDefs}
+              defaultColDef={defaultColDef}
+              rowSelection="single"
+              onSelectionChanged={onSelectionChanged}
+              onCellValueChanged={onCellValueChanged}
+              domLayout="normal"
+              suppressCellFocus={false}
+            />
+          )}
         </div>
 
         {/* 하단 컨트롤 바 */}
