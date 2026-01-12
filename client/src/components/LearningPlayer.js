@@ -43,7 +43,7 @@ function LearningPlayer({ song, userId, onBack }) {
 
   const updateCurrentLyric = React.useCallback((currentTime) => {
     const index = lyrics.findIndex(
-      (lyric) => currentTime >= lyric.start_time && currentTime <= lyric.end_time
+      (lyric) => currentTime >= parseFloat(lyric.start_time || 0) && currentTime <= parseFloat(lyric.end_time || 0)
     );
     if (index !== -1 && index !== currentLyricIndex) {
       console.log(`🎵 ${currentTime.toFixed(2)}초 -> 가사 ${index + 1}번 활성화: "${lyrics[index].text}"`);
@@ -114,17 +114,17 @@ function LearningPlayer({ song, userId, onBack }) {
       const currentLyric = lyrics[currentLyricIndex];
       const currentTime = playerRef.current?.getCurrentTime?.() || 0;
       
-      if (currentTime >= currentLyric.end_time) {
-        console.log(`🔁 반복 모드: ${currentLyric.start_time}초로 이동`);
-        playerRef.current.seekTo(currentLyric.start_time);
+      if (currentTime >= parseFloat(currentLyric.end_time || 0)) {
+        console.log(`🔁 반복 모드: ${parseFloat(currentLyric.start_time || 0)}초로 이동`);
+        playerRef.current.seekTo(parseFloat(currentLyric.start_time || 0));
       }
     }
   };
 
   const handleLyricClick = async (lyric, index) => {
     if (playerRef.current) {
-      console.log(`👆 가사 클릭: ${index + 1}번 "${lyric.text}" (${lyric.start_time}초)`);
-      playerRef.current.seekTo(lyric.start_time);
+      console.log(`👆 가사 클릭: ${index + 1}번 "${lyric.text}" (${parseFloat(lyric.start_time || 0)}초)`);
+      playerRef.current.seekTo(parseFloat(lyric.start_time || 0));
       playerRef.current.playVideo();
       setCurrentLyricIndex(index);
       
@@ -166,7 +166,7 @@ function LearningPlayer({ song, userId, onBack }) {
     setRepeatMode(!repeatMode);
     setCurrentLyricIndex(index);
     if (playerRef.current) {
-      playerRef.current.seekTo(lyric.start_time);
+      playerRef.current.seekTo(parseFloat(lyric.start_time || 0));
       playerRef.current.playVideo();
     }
   };
@@ -364,7 +364,7 @@ function LearningPlayer({ song, userId, onBack }) {
                       </div>
                     )}
                     <div className="lyric-time">
-                      {lyric.start_time}s - {lyric.end_time}s
+                      {parseFloat(lyric.start_time || 0).toFixed(1)}s - {parseFloat(lyric.end_time || 0).toFixed(1)}s
                       {lyric.practice_count > 0 && (
                         <span className="practice-count">
                           🔄 {lyric.practice_count}회 연습

@@ -10,8 +10,8 @@ function BatchTimestampEditor({ lyrics, onSave, onCancel, playerRef, songId }) {
     // lyrics를 복사하여 편집 가능한 상태로 만듦
     const mapped = lyrics.map(lyric => ({
       ...lyric,
-      start_time: lyric.start_time || 0,
-      end_time: lyric.end_time || 0
+      start_time: parseFloat(lyric.start_time) || 0,
+      end_time: parseFloat(lyric.end_time) || 0
     }));
     setEditedLyrics(mapped);
     
@@ -80,10 +80,10 @@ function BatchTimestampEditor({ lyrics, onSave, onCancel, playerRef, songId }) {
   };
 
   const duration = selectedLyric 
-    ? (selectedLyric.end_time - selectedLyric.start_time).toFixed(2)
+    ? (parseFloat(selectedLyric.end_time || 0) - parseFloat(selectedLyric.start_time || 0)).toFixed(2)
     : '0.00';
   
-  const hasError = selectedLyric && selectedLyric.end_time <= selectedLyric.start_time;
+  const hasError = selectedLyric && parseFloat(selectedLyric.end_time || 0) <= parseFloat(selectedLyric.start_time || 0);
 
   return (
     <div className="batch-editor-overlay">
@@ -110,8 +110,8 @@ function BatchTimestampEditor({ lyrics, onSave, onCancel, playerRef, songId }) {
                   <div className="item-content">
                     <div className="item-text">{lyric.text}</div>
                     <div className="item-time">
-                      {lyric.start_time.toFixed(1)}s - {lyric.end_time.toFixed(1)}s
-                      {lyric.end_time <= lyric.start_time && (
+                      {parseFloat(lyric.start_time || 0).toFixed(1)}s - {parseFloat(lyric.end_time || 0).toFixed(1)}s
+                      {parseFloat(lyric.end_time || 0) <= parseFloat(lyric.start_time || 0) && (
                         <span className="error-badge">⚠️</span>
                       )}
                     </div>
