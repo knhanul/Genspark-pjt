@@ -75,6 +75,17 @@
   font-size: 1.5rem;
 }
 
+.lyrics-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.lyrics-header h3 {
+  margin: 0;
+}
+
 .lyrics-list {
   display: flex;
   flex-direction: column;
@@ -101,8 +112,19 @@
 
 .lyric-item.active {
   border-color: #764ba2;
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.25) 0%, rgba(118, 75, 162, 0.25) 100%);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+  transform: scale(1.02);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+  }
+  50% {
+    box-shadow: 0 8px 30px rgba(102, 126, 234, 0.7);
+  }
 }
 
 .lyric-item.mastered {
@@ -186,10 +208,31 @@
   background: #28a745;
 }
 
+.btn-icon.btn-edit {
+  background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+  color: white;
+  font-size: 1.2rem;
+}
+
+.btn-icon.btn-edit:hover {
+  background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+}
+
 .empty-lyrics {
   text-align: center;
-  padding: 3rem;
+  padding: 4rem 3rem;
   color: #999;
+}
+
+.empty-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.empty-lyrics p {
+  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
 }
 
 .progress-summary {
