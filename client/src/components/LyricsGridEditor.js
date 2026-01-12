@@ -1,9 +1,13 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { AgGridReact } from 'ag-grid-react';
+import { ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 import './LyricsGridEditor.css';
 import axios from 'axios';
+
+// AG Grid 모듈 등록
+ModuleRegistry.registerModules([AllCommunityModule]);
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
 
