@@ -160,34 +160,70 @@
 .format-examples {
   background: white;
   padding: 1rem;
-  border-radius: 6px;
+  border-radius: 8px;
   margin: 0.75rem 0;
+  border: 2px solid #e3f2fd;
 }
 
-.format-item {
-  margin-bottom: 0.75rem;
+.format-section {
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border-left: 3px solid #667eea;
 }
 
-.format-item:last-child {
+.format-section:last-child {
   margin-bottom: 0;
 }
 
-.format-item strong {
+.format-section strong {
   display: block;
   color: #667eea;
-  font-size: 0.85rem;
-  margin-bottom: 0.25rem;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  font-weight: 700;
 }
 
-.format-item code {
+.format-section code {
   display: block;
-  background: #f8f9fa;
-  padding: 0.5rem;
+  background: white;
+  padding: 0.75rem;
   border-radius: 4px;
-  font-family: monospace;
+  font-family: 'Courier New', monospace;
   font-size: 0.85rem;
   color: #333;
   border: 1px solid #dee2e6;
+  line-height: 1.8;
+  white-space: pre-wrap;
+}
+
+.help-tips {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  background: #e8f5e9;
+  border-radius: 6px;
+  border-left: 3px solid #4caf50;
+}
+
+.tip {
+  color: #2e7d32;
+  font-size: 0.85rem;
+  margin-bottom: 0.25rem;
+  font-weight: 500;
+}
+
+.tip:last-child {
+  margin-bottom: 0;
+}
+
+.tip code {
+  background: white;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: monospace;
+  font-size: 0.8rem;
+  border: 1px solid #c8e6c9;
 }
 
 .lyrics-input {
@@ -214,17 +250,33 @@
 
 .preview-info {
   margin-top: 0.75rem;
-  padding: 0.75rem;
-  background: #f8f9fa;
-  border-radius: 6px;
-  text-align: center;
-  color: #666;
-  font-size: 0.9rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, #e3f2fd, #f3e5f5);
+  border-radius: 8px;
+  border: 2px solid #667eea;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
-.preview-info strong {
+.preview-count {
+  font-size: 1rem;
+  color: #333;
+  font-weight: 600;
+}
+
+.preview-count strong {
   color: #667eea;
-  font-size: 1.1rem;
+  font-size: 1.3rem;
+}
+
+.preview-hint {
+  font-size: 0.85rem;
+  color: #666;
+  padding: 0.5rem;
+  background: white;
+  border-radius: 4px;
+  border-left: 3px solid #ff9800;
 }
 
 .manual-mode {

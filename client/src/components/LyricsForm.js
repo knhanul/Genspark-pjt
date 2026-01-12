@@ -101,46 +101,52 @@ function LyricsForm({ song, onComplete, onCancel }) {
           {mode === 'auto' ? (
             <div className="auto-mode">
               <div className="help-text">
-                <h4>💡 입력 형식</h4>
+                <h4>💡 여러 줄 가사 한 번에 입력하기</h4>
                 <div className="format-examples">
-                  <div className="format-item">
-                    <strong>시간 정보 포함:</strong>
-                    <code>14.5-18.0 Imagine there's no heaven | 천국이 없다고 상상해봐요</code>
+                  <div className="format-section">
+                    <strong>✅ 권장: 가사만 입력 (타임스탬프는 나중에 편집)</strong>
+                    <code>Imagine there's no heaven | 천국이 없다고 상상해봐요
+It's easy if you try | 노력하면 쉬워요
+No hell below us | 우리 아래 지옥도 없고</code>
                   </div>
-                  <div className="format-item">
-                    <strong>가사만:</strong>
-                    <code>Imagine there's no heaven | 천국이 없다고 상상해봐요</code>
-                  </div>
-                  <div className="format-item">
-                    <strong>번역 없이:</strong>
-                    <code>14.5-18.0 Imagine there's no heaven</code>
+                  <div className="format-section">
+                    <strong>⚙️ 고급: 시간 정보 포함</strong>
+                    <code>14.5-18.0 Imagine there's no heaven | 천국이 없다고 상상해봐요
+18.0-21.5 It's easy if you try | 노력하면 쉬워요</code>
                   </div>
                 </div>
-                <ul>
-                  <li>한 줄에 한 구절씩 입력</li>
-                  <li>시작시간-종료시간 가사 | 번역 형식</li>
-                  <li>시간 정보는 나중에 [일괄 편집]으로 추가 가능</li>
-                  <li>| 뒤에 한글 번역 (선택사항)</li>
-                </ul>
+                <div className="help-tips">
+                  <div className="tip">✓ 한 줄에 한 구절씩 입력</div>
+                  <div className="tip">✓ 번역은 <code>|</code> 뒤에 입력 (선택사항)</div>
+                  <div className="tip">✓ 시간 정보 없이 입력 후 <strong>📋 일괄 편집</strong>으로 타임스탬프 추가</div>
+                </div>
               </div>
 
               <textarea
                 className="lyrics-input"
                 value={lyrics}
                 onChange={(e) => setLyrics(e.target.value)}
-                placeholder="예시:
-14.5-18.0 Imagine there's no heaven | 천국이 없다고 상상해봐요
-18.0-21.5 It's easy if you try | 노력하면 쉬워요
-21.5-24.5 No hell below us | 우리 아래 지옥도 없고
+                placeholder="가사를 여러 줄로 입력하세요 (복사 붙여넣기 가능)
 
-또는 시간 없이:
 Imagine there's no heaven | 천국이 없다고 상상해봐요
-It's easy if you try | 노력하면 쉬워요"
-                rows={15}
+It's easy if you try | 노력하면 쉬워요
+No hell below us | 우리 아래 지옥도 없고
+Above us only sky | 우리 위엔 오직 하늘만
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+💡 Tip: 시간 정보는 나중에 [📋 일괄 편집]에서
+     영상을 보며 편리하게 추가할 수 있습니다!"
+                rows={18}
               />
 
               <div className="preview-info">
-                입력된 줄 수: <strong>{lyrics.split('\n').filter(l => l.trim()).length}개</strong>
+                <div className="preview-count">
+                  📊 입력된 가사: <strong>{lyrics.split('\n').filter(l => l.trim()).length}줄</strong>
+                </div>
+                <div className="preview-hint">
+                  💡 등록 후 [📋 일괄 편집] 버튼으로 타임스탬프를 추가하세요
+                </div>
               </div>
             </div>
           ) : (
