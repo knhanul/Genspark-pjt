@@ -267,6 +267,20 @@
   color: white;
 }
 
+.btn-delete-all {
+  border-color: #721c24;
+  color: #721c24;
+  background: #f8d7da;
+  font-weight: 700;
+}
+
+.btn-delete-all:hover {
+  background: #721c24;
+  color: white;
+  border-color: #721c24;
+  box-shadow: 0 4px 12px rgba(114, 28, 36, 0.4);
+}
+
 .btn-download {
   border-color: #17a2b8;
   color: #17a2b8;

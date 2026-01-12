@@ -88,8 +88,9 @@ function LyricsGridEditor({ song, onClose, playerRef, onSave }) {
   const loadLyrics = useCallback(async () => {
     try {
       const response = await axios.get(`${API_URL}/lyrics/song/${song.id}`);
+      console.log('📥 가사 로드:', response.data);
       const lyrics = response.data.map((lyric, index) => ({
-        lyric_id: lyric.lyric_id || null,
+        lyric_id: lyric.id || lyric.lyric_id || null, // id 필드 우선 사용
         line_number: lyric.line_number || index + 1,
         text: lyric.text || '',
         translation: lyric.translation || '',
@@ -97,9 +98,10 @@ function LyricsGridEditor({ song, onClose, playerRef, onSave }) {
         end_time: parseFloat(lyric.end_time) || 0,
         song_id: song.id
       }));
+      console.log('✅ 변환된 가사:', lyrics);
       setRowData(lyrics);
     } catch (error) {
-      console.error('가사 로드 실패:', error);
+      console.error('❌ 가사 로드 실패:', error);
       setRowData([]);
     }
   }, [song.id]);
@@ -212,17 +214,35 @@ function LyricsGridEditor({ song, onClose, playerRef, onSave }) {
       return;
     }
 
+    if (window.confirm(`${selectedRow.line_number}번 가사를 삭제하시겠습니까?`)) {
+      const allRows = [];
+      gridRef.current.api.forEachNode((node) => allRows.push(node.data));
+      const filtered = allRows.filter(row => row.line_number !== selectedRow.line_number);
+      
+      // 라인 넘버 재정렬
+      filtered.forEach((row, index) => {
+        row.line_number = index + 1;
+      });
+      
+      setRowData(filtered);
+      setSelectedRow(null);
+    }
+  };
+
+  const handleDeleteAllRows = () => {
     const allRows = [];
     gridRef.current.api.forEachNode((node) => allRows.push(node.data));
-    const filtered = allRows.filter(row => row.line_number !== selectedRow.line_number);
     
-    // 라인 넘버 재정렬
-    filtered.forEach((row, index) => {
-      row.line_number = index + 1;
-    });
-    
-    setRowData(filtered);
-    setSelectedRow(null);
+    if (allRows.length === 0) {
+      alert('삭제할 가사가 없습니다.');
+      return;
+    }
+
+    if (window.confirm(`전체 ${allRows.length}개 가사를 모두 삭제하시겠습니까?\n\n⚠️ 이 작업은 되돌릴 수 없습니다!`)) {
+      setRowData([]);
+      setSelectedRow(null);
+      console.log('🗑️ 전체 가사 삭제됨');
+    }
   };
 
   const handleSetStartTime = () => {
@@ -471,7 +491,10 @@ function LyricsGridEditor({ song, onClose, playerRef, onSave }) {
               ➕ 행 추가
             </button>
             <button className="ctrl-btn btn-delete" onClick={handleDeleteRow} disabled={!selectedRow}>
-              🗑️ 행 삭제
+              🗑️ 선택 행 삭제
+            </button>
+            <button className="ctrl-btn btn-delete-all" onClick={handleDeleteAllRows}>
+              🗑️ 전체 삭제
             </button>
           </div>
 
